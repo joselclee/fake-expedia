@@ -123,6 +123,78 @@ app.post('/customers', (req, res) => {
   });
 });
 
+// Update customer profile
+app.put('/customers/:id', (req, res) => {
+  const { id } = req.params;
+  const { Email, Preferences, Rating, CreditCard, LastName, FirstName, Address, City, State, Zip, Telephone } = req.body;
+  const query = 'UPDATE Customer SET Email = ?, Preferences = ?, Rating = ?, CreditCard = ? WHERE CustomerID = ?';
+  db.query(query, [Email, Preferences, Rating, CreditCard, id], (err, results) => {
+    if (err) {
+      console.error('Error updating customer profile:', err);
+      res.status(500).send('Error updating customer profile');
+    } else {
+      const personQuery = 'UPDATE Person SET LastName = ?, FirstName = ?, Address = ?, City = ?, State = ?, Zip = ?, Telephone = ? WHERE PersonID = ?';
+      db.query(personQuery, [LastName, FirstName, Address, City, State, Zip, Telephone, id], (err, personResults) => {
+        if (err) {
+          console.error('Error updating person:', err);
+          res.status(500).send('Error updating person');
+        } else {
+          res.send('Customer profile updated successfully');
+        }
+      });
+    }
+  });
+});
+
+// Delete customer
+app.delete('/customers/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM Customer WHERE CustomerID = ?';
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error deleting customer:', err);
+      res.status(500).send('Error deleting customer');
+    } else {
+      const personQuery = 'DELETE FROM Person WHERE PersonID = ?';
+      db.query(personQuery, [id], (err, personResults) => {
+        if (err) {
+          console.error('Error deleting person:', err);
+          res.status(500).send('Error deleting person');
+        } else {
+          res.send('Customer deleted successfully');
+        }
+      });
+    }
+  });
+});
+
+// Get all customers
+app.get('/customers', (req, res) => {
+  const query = 'SELECT * FROM Customer';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching customers:', err);
+      res.status(500).send('Error fetching customers');
+    } else {
+      res.json(results);
+    }
+  });
+});
+
+// Get reservations by date
+app.get('/reservations/date/:date', (req, res) => {
+  const { date } = req.params;
+  const query = 'SELECT * FROM Reservation WHERE Date = ?';
+  db.query(query, [date], (err, results) => {
+    if (err) {
+      console.error('Error fetching reservations:', err);
+      res.status(500).send('Error fetching reservations');
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
