@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import logo from '../assets/turkishairlines.svg';
+import './Header.css';
 
 const Header = () => {
   return (
@@ -17,6 +18,8 @@ const Header = () => {
             <Nav.Link href="/flights">Flights</Nav.Link>
             <Nav.Link href="/hotels">Hotels</Nav.Link>
             <Nav.Link href="/car-rentals">Car Rentals</Nav.Link>
+          </Nav>
+          <Nav className="ms-auto">
             <Nav.Link href="/profile">Profile</Nav.Link>
           </Nav>
         </Navbar.Collapse>
