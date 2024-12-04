@@ -5,7 +5,13 @@ const db = require('../db/connection');
 // Get customer profile
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'SELECT * FROM Customer WHERE CustomerID = ?';
+  const query = `
+    SELECT c.CustomerID, c.Email, c.Preferences, c.Rating, c.CreditCard,
+           p.LastName, p.FirstName, p.Address, p.City, p.State, p.Zip, p.Telephone
+    FROM Customer c
+    JOIN Person p ON c.CustomerID = p.PersonID
+    WHERE c.CustomerID = ?
+  `;
   db.query(query, [id], (err, results) => {
     if (err) {
       console.error('Error fetching customer profile:', err);
@@ -17,8 +23,8 @@ router.get('/:id', (req, res) => {
 });
 
 // Create a new customer
-app.post('/customers', (req, res) => {
-  const { Email, Preferences, Rating, CreditCard, LastName, FirstName, Address, City, State, Zip, Telephone } = req.body;
+router.post('/', (req, res) => {
+  const { email, Preferences, Rating, CreditCard, LastName, FirstName, Address, City, State, Zip, Telephone } = req.body;
   const personQuery = 'INSERT INTO Person (LastName, FirstName, Address, City, State, Zip, Telephone) VALUES (?, ?, ?, ?, ?, ?, ?)';
   db.query(personQuery, [LastName, FirstName, Address, City, State, Zip, Telephone], (err, personResults) => {
     if (err) {
@@ -26,8 +32,8 @@ app.post('/customers', (req, res) => {
       res.status(500).send('Error creating person');
     } else {
       const personID = personResults.insertId;
-      const customerQuery = 'INSERT INTO Customer (CustomerID, Email, Preferences, Rating, CreditCard) VALUES (?, ?, ?, ?, ?)';
-      db.query(customerQuery, [personID, Email, Preferences, Rating, CreditCard], (err, customerResults) => {
+      const customerQuery = 'INSERT INTO Customer (CustomerID, email, Preferences, Rating, CreditCard) VALUES (?, ?, ?, ?, ?)';
+      db.query(customerQuery, [personID, email, Preferences, Rating, CreditCard], (err, customerResults) => {
         if (err) {
           console.error('Error creating customer:', err);
           res.status(500).send('Error creating customer');
@@ -40,11 +46,11 @@ app.post('/customers', (req, res) => {
 });
 
 // Update customer profile
-app.put('/customers/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { Email, Preferences, Rating, CreditCard, LastName, FirstName, Address, City, State, Zip, Telephone } = req.body;
+  const { email, Preferences, Rating, CreditCard, LastName, FirstName, Address, City, State, Zip, Telephone } = req.body;
   const query = 'UPDATE Customer SET Email = ?, Preferences = ?, Rating = ?, CreditCard = ? WHERE CustomerID = ?';
-  db.query(query, [Email, Preferences, Rating, CreditCard, id], (err, results) => {
+  db.query(query, [email, Preferences, Rating, CreditCard, id], (err, results) => {
     if (err) {
       console.error('Error updating customer profile:', err);
       res.status(500).send('Error updating customer profile');
@@ -63,7 +69,7 @@ app.put('/customers/:id', (req, res) => {
 });
 
 // Delete customer
-app.delete('/customers/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   const { id } = req.params;
   const query = 'DELETE FROM Customer WHERE CustomerID = ?';
   db.query(query, [id], (err, results) => {
@@ -85,7 +91,7 @@ app.delete('/customers/:id', (req, res) => {
 });
 
 // Get all customers
-app.get('/customers', (req, res) => {
+router.get('/', (req, res) => {
   const query = 'SELECT * FROM Customer';
   db.query(query, (err, results) => {
     if (err) {
@@ -97,14 +103,21 @@ app.get('/customers', (req, res) => {
   });
 });
 
-// Get customer profile
-app.get('/customers/:id', (req, res) => {
-  const { id } = req.params;
-  const query = 'SELECT * FROM Customer WHERE CustomerID = ?';
-  db.query(query, [id], (err, results) => {
+// Customer login
+router.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const query = `
+    SELECT c.CustomerID, p.FirstName, p.LastName, c.Email
+    FROM Customer c
+    JOIN Person p ON c.CustomerID = p.PersonID
+    WHERE c.Email = ? AND c.Password = ?
+  `;
+  db.query(query, [email, password], (err, results) => {
     if (err) {
-      console.error('Error fetching customer profile:', err);
-      res.status(500).send('Error fetching customer profile');
+      console.error('Error logging in:', err);
+      res.status(500).send('Error logging in');
+    } else if (results.length === 0) {
+      res.status(401).send('Invalid email or password');
     } else {
       res.json(results[0]);
     }

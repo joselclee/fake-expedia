@@ -6,9 +6,10 @@ const db = require('./db/connection');
 const customerRoutes = require('./routes/customers');
 const reservationRoutes = require('./routes/reservations');
 const flightRoutes = require('./routes/flights');
+const employeeRoutes = require('./routes/employees'); // Import the employees routes
 const errorHandler = require('./middleware/errorHandler');
 
-const app = express();
+const app = express(); // Define the app variable using express()
 app.use(cors());
 app.use(express.json());
 
@@ -16,7 +17,7 @@ app.use(express.json());
 app.use('/customers', customerRoutes);
 app.use('/reservations', reservationRoutes);
 app.use('/flights', flightRoutes);
-app.use('/employees',employeesRouters)
+app.use('/employees', employeeRoutes); // Use the employees routes
 
 // Root route
 app.get('/', (req, res) => {

@@ -17,7 +17,7 @@ router.get('/customers/:id', (req, res) => {
 });
 
 // Create a new reservation
-app.post('/reservations', (req, res) => {
+router.post('/reservations', (req, res) => {
     const { Date, Passengers, TotalFare, CustomerID } = req.body;
     const query = 'INSERT INTO Reservation (Date, Passengers, TotalFare, CustomerID) VALUES (?, ?, ?, ?)';
     db.query(query, [Date, Passengers, TotalFare, CustomerID], (err, results) => {
@@ -31,7 +31,7 @@ app.post('/reservations', (req, res) => {
   });
   
   // Get all reservations for a customer
-  app.get('/customers/:id/reservations', (req, res) => {
+  router.get('/customers/:id/reservations', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM Reservation WHERE CustomerID = ?';
     db.query(query, [id], (err, results) => {
@@ -45,7 +45,7 @@ app.post('/reservations', (req, res) => {
   });
   
   // Get reservations by date
-  app.get('/reservations/date/:date', (req, res) => {
+  router.get('/reservations/date/:date', (req, res) => {
     const { date } = req.params;
     const query = 'SELECT * FROM Reservation WHERE Date = ?';
     db.query(query, [date], (err, results) => {

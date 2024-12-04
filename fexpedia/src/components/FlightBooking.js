@@ -21,8 +21,15 @@ const FlightBooking = () => {
     console.log('Return Date:', returnDate);
     console.log('Guests:', guests);
 
+    const params = {
+      from,
+      to,
+      departureDate,
+      returnDate,
+    };
+
     try {
-      const response = await axios.get('http://localhost:5000/flights');
+      const response = await axios.get('http://localhost:5000/flights', { params });
       console.log('Response received:', response);
       setFlights(response.data);
     } catch (error) {
